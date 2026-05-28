@@ -1174,56 +1174,94 @@ function removeTyping(){
   const t=document.getElementById('typing-msg');
   if(t)t.remove();
 }
-
-function sendMessage(){
+async function sendMessage(){
   if(isTyping)return;
+
   const input=document.getElementById('chat-input');
   const text=input.value.trim();
+
   if(!text)return;
+
   const today = new Date().toDateString();
 
-const stored = JSON.parse(
-  localStorage.getItem("zedlingo_usage") ||
-  '{"date":"","count":0}'
-);
-
-// Reset count if new day
-if (stored.date !== today) {
-  stored.date = today;
-  stored.count = 0;
-}
-
-// Check limit
-if (stored.count >= 20) {
-  addMsg(
-    "ai",
-    "⚠️ You have reached your 20 message daily limit. Come back tomorrow!"
+  let stored = JSON.parse(
+    localStorage.getItem("zedlingo_usage") ||
+    '{"date":"","count":0}'
   );
-  return;
-}
 
-// Increase count
-stored.count += 1;
+  // Reset daily count
+  if(stored.date !== today){
+    stored.date = today;
+    stored.count = 0;
+  }
 
-// Save updated usage
-localStorage.setItem(
-  "zedlingo_usage",
-  JSON.stringify(stored)
-);
-  addMsg('user',text);
+  // Limit messages
+  if(stored.count >= 20){
+    addMsg(
+      "ai",
+      "⚠️ You have reached your 20 message daily limit. Come back tomorrow!"
+    );
+    return;
+  }
+
+  // Increase usage
+  stored.count += 1;
+
+  localStorage.setItem(
+    "zedlingo_usage",
+    JSON.stringify(stored)
+  );
+
+  addMsg('user', text);
+
   input.value='';
+
   isTyping=true;
+
   document.getElementById('status-text').textContent='● Thinking...';
+
   showTyping();
-  const delay=1200+Math.random()*800;
-  setTimeout(()=>{
+
+  try {
+
+    const response = await fetch("/.netlify/functions/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: text,
+        language: activeLang
+      })
+    });
+
+    const data = await response.json();
+
     removeTyping();
-    const resp=aiResponses[Math.floor(Math.random()*aiResponses.length)];
-    addMsg('ai',resp);
-    isTyping=false;
-    document.getElementById('status-text').textContent='● Active — Ready to chat';
-  },delay);
+
+    addMsg(
+      'ai',
+      data.reply || "Sorry, I could not respond right now."
+    );
+
+  } catch(error){
+
+    removeTyping();
+
+    addMsg(
+      'ai',
+      "⚠️ Something went wrong. Please try again."
+    );
+
+    console.error(error);
+  }
+
+  isTyping=false;
+
+  document.getElementById('status-text').textContent='● Active — Ready to chat';
 }
+
+
 
 function fillPrompt(text){
   document.getElementById('chat-input').value=text;
