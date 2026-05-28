@@ -1180,6 +1180,36 @@ function sendMessage(){
   const input=document.getElementById('chat-input');
   const text=input.value.trim();
   if(!text)return;
+  const today = new Date().toDateString();
+
+const stored = JSON.parse(
+  localStorage.getItem("zedlingo_usage") ||
+  '{"date":"","count":0}'
+);
+
+// Reset count if new day
+if (stored.date !== today) {
+  stored.date = today;
+  stored.count = 0;
+}
+
+// Check limit
+if (stored.count >= 20) {
+  addMsg(
+    "ai",
+    "⚠️ You have reached your 20 message daily limit. Come back tomorrow!"
+  );
+  return;
+}
+
+// Increase count
+stored.count += 1;
+
+// Save updated usage
+localStorage.setItem(
+  "zedlingo_usage",
+  JSON.stringify(stored)
+);
   addMsg('user',text);
   input.value='';
   isTyping=true;
