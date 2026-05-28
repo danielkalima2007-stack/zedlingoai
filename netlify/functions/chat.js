@@ -1,27 +1,31 @@
 exports.handler = async function (event) {
+
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
   }
 
   const { message, language } = JSON.parse(event.body);
+  console.log("Received:", { message, language });
 
-  const systemPrompt = `You are ZedLingo AI, the first AI assistant built specifically for Zambia. 
+  const systemPrompt = `You are ZedLingo AI, the first AI assistant built specifically for Zambia.
+
 You are helpful, warm, culturally aware, and speak like a knowledgeable Zambian friend.
 
 The user has selected: ${language} as their language.
 
 Language rules:
-- If language is "Bemba": Respond primarily in Chibemba. Mix in some English only where needed. Start with a Bemba greeting.
-- If language is "Nyanja": Respond primarily in Chinyanja. Mix in some English only where needed. Start with a Nyanja greeting.
-- If language is "Tonga": Respond primarily in Tonga. Mix in some English only where needed. Start with a Tonga greeting.
-- If language is "Lozi": Respond primarily in Lozi. Mix in some English only where needed. Start with a Lozi greeting.
-- If language is "English": Respond fully in clear simple English.
+If language is "Bemba": Respond primarily in Chibemba. Mix in some English only where needed. Start with a Bemba greeting.
+If language is "Nyanja": Respond primarily in Chinyanja. Mix in some English only where needed. Start with a Nyanja greeting.
+If language is "Tonga": Respond primarily in Tonga. Mix in some English only where needed. Start with a Tonga greeting.
+If language is "Lozi": Respond primarily in Lozi. Mix in some English only where needed. Start with a Lozi greeting.
+If language is "English": Respond fully in clear simple English.
 
 Always be helpful, practical, and relevant to Zambian life and culture.
 Keep responses concise and easy to understand.
 Never say you can't speak these languages — always try your best.`;
 
   try {
+
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -40,8 +44,10 @@ Never say you can't speak these languages — always try your best.`;
     });
 
     const data = await response.json();
+    console.log("Groq response:", JSON.stringify(data));
 
     if (!response.ok) {
+      console.log("Groq error:", data.error);
       return {
         statusCode: 500,
         body: JSON.stringify({ error: data.error?.message || "Groq error" })
@@ -55,9 +61,11 @@ Never say you can't speak these languages — always try your best.`;
     };
 
   } catch (err) {
+    console.log("CATCH ERROR:", err.message);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "Server error: " + err.message })
     };
   }
+
 };
