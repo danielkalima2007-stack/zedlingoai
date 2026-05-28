@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZedLingo AI – AI That Speaks Zambia</title>
+<meta name="description" content="ZedLingo AI is Zambia's first advanced AI platform supporting Chibemba, Chinyanja, Tonga and Lozi languages. Built in Zambia for Africa.">
+<meta name="keywords" content="Zambian AI, African AI, Bemba chatbot, Nyanja AI, Tonga AI, Lozi AI, Zambia technology, AI Africa, ZedLingo">
+<meta property="og:title" content="ZedLingo AI – AI That Speaks Zambia">
+<meta property="og:description" content="Chat in Bemba, Nyanja, Tonga and Lozi using the power of AI.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00ff88;
+    --green-dim: #00cc6a;
+    --green-glow: rgba(0,255,136,0.15);
+    --blue: #4d9fff;
+    --blue-glow: rgba(77,159,255,0.12);
+    --purple: #b46fff;
+    --purple-glow: rgba(180,111,255,0.12);
+    --orange: #ff8c42;
+    --orange-glow: rgba(255,140,66,0.12);
+    --bg: #040a0f;
+    --bg2: #070e14;
+    --bg3: #0a1520;
+    --surface: rgba(255,255,255,0.03);
+    --surface2: rgba(255,255,255,0.06);
+    --border: rgba(0,255,136,0.12);
+    --text: #e8f0e9;
+    --text-muted: rgba(232,240,233,0.5);
+    --font-display: 'Orbitron', monospace;
+    --font-body: 'Syne', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); overflow-x: hidden; line-height: 1.6; }
+  ::selection { background: var(--green); color: #000; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--green-dim); border-radius: 4px; }
+
+  #bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+  .african-pattern {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.025;
+    background-image:
+      repeating-linear-gradient(60deg, var(--green) 0, var(--green) 1px, transparent 0, transparent 50%),
+      repeating-linear-gradient(120deg, var(--green) 0, var(--green) 1px, transparent 0, transparent 50%);
+    background-size: 60px 60px;
+  }
+
+  .glow-orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; opacity: 0.12; }
+  .glow-orb-1 { width: 500px; height: 500px; background: radial-gradient(circle, var(--green), transparent); top: -100px; left: -100px; animation: float 8s ease-in-out infinite; }
+  .glow-orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, var(--blue), transparent); bottom: 20%; right: -80px; animation: float 10s ease-in-out infinite reverse; }
+  .glow-orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, var(--purple), transparent); top: 50%; left: 30%; animation: float 12s ease-in-out infinite; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    padding: 18px 24px; display: flex; align-items: center; justify-content: space-between;
+    background: rgba(4,10,15,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .logo-icon {
+    width: 36px; height: 36px; background: linear-gradient(135deg, var(--green), var(--blue));
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 14px; font-weight: 900; color: #000;
+    box-shadow: 0 0 20px var(--green-glow); flex-shrink: 0;
+  }
+  .logo-text { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: 1px; }
+  .logo-text span { color: var(--green); }
+
+  .nav-links { display: flex; gap: 8px; align-items: center; }
+  .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 13px; font-weight: 500; padding: 6px 14px; border-radius: 20px; transition: all 0.3s; letter-spacing: 0.5px; }
+  .nav-links a:hover { color: var(--green); }
+  .nav-cta { background: linear-gradient(135deg, var(--green), var(--green-dim)) !important; color: #000 !important; font-weight: 700 !important; box-shadow: 0 0 20px var(--green-glow); }
+  .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 0 30px rgba(0,255,136,0.3) !important; }
+
+  .hero {
+    position: relative; z-index: 1; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 100px 24px 60px; text-align: center; overflow: hidden;
+  }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(0,255,136,0.08); border: 1px solid rgba(0,255,136,0.2);
+    border-radius: 30px; padding: 8px 18px; font-size: 12px; font-family: var(--font-mono);
+    color: var(--green); margin-bottom: 32px; letter-spacing: 1.5px; text-transform: uppercase;
+    animation: fadeSlideUp 0.8s ease both;
+  }
+  .badge-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+
+  .hero h1 { font-family: var(--font-display); font-size: clamp(36px, 9vw, 82px); font-weight: 900; line-height: 1.05; letter-spacing: -1px; margin-bottom: 24px; animation: fadeSlideUp 0.8s 0.1s ease both; }
+  .hero h1 .line1 { display: block; color: var(--text); }
+  .hero h1 .line2 { display: block; background: linear-gradient(90deg, var(--green), var(--blue), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+  .hero-sub { font-size: clamp(15px, 2.5vw, 20px); color: var(--text-muted); max-width: 540px; margin: 0 auto 44px; animation: fadeSlideUp 0.8s 0.2s ease both; line-height: 1.7; }
+
+  .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; animation: fadeSlideUp 0.8s 0.3s ease both; margin-bottom: 70px; }
+
+  .btn-primary { background: linear-gradient(135deg, var(--green), var(--green-dim)); color: #000; font-family: var(--font-body); font-weight: 700; font-size: 14px; padding: 14px 32px; border-radius: 50px; border: none; cursor: pointer; letter-spacing: 0.5px; box-shadow: 0 0 30px rgba(0,255,136,0.25); transition: all 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(0,255,136,0.4); }
+
+  .btn-secondary { background: transparent; color: var(--text); font-family: var(--font-body); font-weight: 600; font-size: 14px; padding: 14px 32px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.15); cursor: pointer; letter-spacing: 0.5px; transition: all 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-secondary:hover { border-color: var(--green); color: var(--green); box-shadow: 0 0 20px var(--green-glow); }
+
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; max-width: 700px; width: 100%; animation: fadeSlideUp 0.8s 0.4s ease both; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px 12px; text-align: center; backdrop-filter: blur(12px); transition: all 0.3s; position: relative; overflow: hidden; }
+  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--green), transparent); opacity: 0; transition: opacity 0.3s; }
+  .stat-card:hover::before { opacity: 1; }
+  .stat-card:hover { border-color: rgba(0,255,136,0.3); transform: translateY(-3px); }
+  .stat-value { font-family: var(--font-display); font-size: 22px; font-weight: 900; color: var(--green); margin-bottom: 4px; }
+  .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+
+  section { position: relative; z-index: 1; padding: 80px 24px; }
+  .section-label { font-family: var(--font-mono); font-size: 11px; color: var(--green); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .section-label::before { content: ''; width: 24px; height: 1px; background: var(--green); }
+  .section-title { font-family: var(--font-display); font-size: clamp(26px, 5vw, 42px); font-weight: 700; line-height: 1.15; margin-bottom: 16px; }
+  .section-sub { font-size: 15px; color: var(--text-muted); max-width: 480px; line-height: 1.7; }
+  .section-head { margin-bottom: 48px; }
+  .max-w { max-width: 1100px; margin: 0 auto; }
+
+  .lang-section { background: var(--bg2); }
+  .lang-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .lang-card { position: relative; overflow: hidden; border-radius: 20px; padding: 28px 24px; cursor: pointer; transition: all 0.4s; border: 1px solid transparent; }
+  .lang-card.bemba { background: linear-gradient(135deg, rgba(0,255,136,0.06), rgba(0,255,136,0.02)); border-color: rgba(0,255,136,0.15); }
+  .lang-card.nyanja { background: linear-gradient(135deg, rgba(77,159,255,0.06), rgba(77,159,255,0.02)); border-color: rgba(77,159,255,0.15); }
+  .lang-card.tonga { background: linear-gradient(135deg, rgba(255,140,66,0.06), rgba(255,140,66,0.02)); border-color: rgba(255,140,66,0.15); }
+  .lang-card.lozi { background: linear-gradient(135deg, rgba(180,111,255,0.06), rgba(180,111,255,0.02)); border-color: rgba(180,111,255,0.15); }
+  .lang-card.bemba:hover { border-color: var(--green); box-shadow: 0 0 40px rgba(0,255,136,0.15); transform: translateY(-4px); }
+  .lang-card.nyanja:hover { border-color: var(--blue); box-shadow: 0 0 40px rgba(77,159,255,0.15); transform: translateY(-4px); }
+  .lang-card.tonga:hover { border-color: var(--orange); box-shadow: 0 0 40px rgba(255,140,66,0.15); transform: translateY(-4px); }
+  .lang-card.lozi:hover { border-color: var(--purple); box-shadow: 0 0 40px rgba(180,111,255,0.15); transform: translateY(-4px); }
+  .lang-dot { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 16px; }
+  .bemba .lang-dot { background: rgba(0,255,136,0.12); }
+  .nyanja .lang-dot { background: rgba(77,159,255,0.12); }
+  .tonga .lang-dot { background: rgba(255,140,66,0.12); }
+  .lozi .lang-dot { background: rgba(180,111,255,0.12); }
+  .lang-name { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .bemba .lang-name { color: var(--green); }
+  .nyanja .lang-name { color: var(--blue); }
+  .tonga .lang-name { color: var(--orange); }
+  .lozi .lang-name { color: var(--purple); }
+  .lang-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+  .lang-sample { margin-top: 14px; font-family: var(--font-mono); font-size: 12px; padding: 10px 14px; border-radius: 10px; font-style: italic; }
+  .bemba .lang-sample { background: rgba(0,255,136,0.06); color: var(--green); border-left: 2px solid var(--green); }
+  .nyanja .lang-sample { background: rgba(77,159,255,0.06); color: var(--blue); border-left: 2px solid var(--blue); }
+  .tonga .lang-sample { background: rgba(255,140,66,0.06); color: var(--orange); border-left: 2px solid var(--orange); }
+  .lozi .lang-sample { background: rgba(180,111,255,0.06); color: var(--purple); border-left: 2px solid var(--purple); }
+
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 28px 22px; transition: all 0.4s; position: relative; overflow: hidden; }
+  .feature-card::after { content: ''; position: absolute; inset: -1px; border-radius: 20px; padding: 1px; background: linear-gradient(135deg, var(--green), var(--blue), var(--purple)); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; transition: opacity 0.4s; }
+  .feature-card:hover::after { opacity: 1; }
+  .feature-card:hover { transform: translateY(-5px); background: var(--surface2); }
+  .feat-icon { width: 48px; height: 48px; border-radius: 14px; background: var(--green-glow); border: 1px solid rgba(0,255,136,0.2); display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 18px; }
+  .feat-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px; letter-spacing: 0.5px; }
+  .feat-desc { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+
+  .chat-section { background: var(--bg2); }
+  .chat-window { max-width: 680px; margin: 0 auto; background: var(--bg3); border: 1px solid var(--border); border-radius: 24px; overflow: hidden; box-shadow: 0 0 80px rgba(0,255,136,0.07), 0 40px 80px rgba(0,0,0,0.5); position: relative; }
+  .chat-window::before { content: ''; position: absolute; inset: -1px; border-radius: 24px; padding: 1px; background: linear-gradient(135deg, rgba(0,255,136,0.3), rgba(77,159,255,0.2), rgba(180,111,255,0.2)); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+
+  .chat-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; background: rgba(0,255,136,0.04); border-bottom: 1px solid var(--border); }
+  .chat-ai-info { display: flex; align-items: center; gap: 12px; }
+  .ai-avatar { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--green), var(--blue)); display: flex; align-items: center; justify-content: center; font-size: 18px; position: relative; box-shadow: 0 0 20px rgba(0,255,136,0.3); flex-shrink: 0; }
+  .ai-pulse { position: absolute; inset: -4px; border-radius: 15px; border: 2px solid var(--green); opacity: 0; animation: aiPulse 3s infinite; }
+  .ai-name { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--text); }
+  .ai-status { font-family: var(--font-mono); font-size: 11px; color: var(--green); display: flex; align-items: center; gap: 5px; }
+  .status-dot { width: 5px; height: 5px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+
+  .lang-selector { display: flex; gap: 6px; flex-wrap: wrap; }
+  .lang-pill { font-family: var(--font-mono); font-size: 11px; padding: 5px 10px; border-radius: 20px; border: 1px solid transparent; cursor: pointer; transition: all 0.25s; font-weight: 500; letter-spacing: 0.5px; background: transparent; }
+  .lang-pill.bemba-pill { color: var(--green); border-color: rgba(0,255,136,0.2); }
+  .lang-pill.nyanja-pill { color: var(--blue); border-color: rgba(77,159,255,0.2); }
+  .lang-pill.tonga-pill { color: var(--orange); border-color: rgba(255,140,66,0.2); }
+  .lang-pill.lozi-pill { color: var(--purple); border-color: rgba(180,111,255,0.2); }
+  .lang-pill.bemba-pill.active, .lang-pill.bemba-pill:hover { background: rgba(0,255,136,0.1); border-color: var(--green); }
+  .lang-pill.nyanja-pill.active, .lang-pill.nyanja-pill:hover { background: rgba(77,159,255,0.1); border-color: var(--blue); }
+  .lang-pill.tonga-pill.active, .lang-pill.tonga-pill:hover { background: rgba(255,140,66,0.1); border-color: var(--orange); }
+  .lang-pill.lozi-pill.active, .lang-pill.lozi-pill:hover { background: rgba(180,111,255,0.1); border-color: var(--purple); }
+
+  .chat-messages { padding: 24px 20px; min-height: 320px; max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+  .chat-messages::-webkit-scrollbar { width: 3px; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .msg { display: flex; gap: 10px; animation: msgIn 0.4s ease both; }
+  .msg.user-msg { flex-direction: row-reverse; }
+  .msg-avatar { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; align-self: flex-end; }
+  .msg-avatar.ai { background: linear-gradient(135deg, var(--green), var(--blue)); box-shadow: 0 0 12px rgba(0,255,136,0.25); }
+  .msg-avatar.user { background: var(--surface2); border: 1px solid var(--border); }
+  .msg-bubble { max-width: 78%; padding: 13px 16px; border-radius: 18px; font-size: 14px; line-height: 1.65; position: relative; }
+  .ai-bubble { background: rgba(0,255,136,0.07); border: 1px solid rgba(0,255,136,0.15); border-bottom-left-radius: 6px; color: var(--text); }
+  .user-bubble { background: rgba(77,159,255,0.12); border: 1px solid rgba(77,159,255,0.2); border-bottom-right-radius: 6px; color: var(--text); }
+  .msg-lang-tag { font-family: var(--font-mono); font-size: 10px; opacity: 0.6; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
+
+  .typing-indicator { display: flex; align-items: center; gap: 10px; }
+  .typing-dots { display: flex; gap: 4px; align-items: center; padding: 12px 16px; background: rgba(0,255,136,0.07); border: 1px solid rgba(0,255,136,0.15); border-radius: 18px; border-bottom-left-radius: 6px; }
+  .typing-dots span { width: 7px; height: 7px; background: var(--green); border-radius: 50%; animation: typingDot 1.2s infinite; }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  .chat-input-area { padding: 16px 20px; background: rgba(0,0,0,0.3); border-top: 1px solid var(--border); }
+  .example-prompts { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .prompt-chip { font-family: var(--font-mono); font-size: 11px; padding: 6px 12px; border-radius: 20px; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; transition: all 0.25s; white-space: nowrap; }
+  .prompt-chip:hover { border-color: var(--green); color: var(--green); background: var(--green-glow); }
+
+  .input-row { display: flex; gap: 10px; align-items: center; }
+  .chat-input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 13px 16px; color: var(--text); font-family: var(--font-body); font-size: 14px; outline: none; transition: border-color 0.3s, box-shadow 0.3s; resize: none; max-height: 100px; }
+  .chat-input:focus { border-color: rgba(0,255,136,0.4); box-shadow: 0 0 20px var(--green-glow); }
+  .chat-input::placeholder { color: var(--text-muted); }
+
+  .btn-icon { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; transition: all 0.3s; flex-shrink: 0; }
+  .btn-icon:hover { border-color: var(--green); color: var(--green); background: var(--green-glow); }
+  .btn-send { width: 44px; height: 44px; border-radius: 12px; border: none; background: linear-gradient(135deg, var(--green), var(--green-dim)); color: #000; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; transition: all 0.3s; flex-shrink: 0; box-shadow: 0 0 20px rgba(0,255,136,0.2); }
+  .btn-send:hover { transform: scale(1.08); box-shadow: 0 0 30px rgba(0,255,136,0.4); }
+  .btn-send:active { transform: scale(0.95); }
+  .btn-send:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .examples-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .example-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 14px; }
+  .example-card:hover { border-color: var(--green); background: var(--green-glow); transform: translateX(4px); }
+  .ex-icon { width: 42px; height: 42px; border-radius: 12px; background: rgba(0,255,136,0.08); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .ex-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .ex-sub { font-size: 12px; color: var(--text-muted); }
+
+  .voice-section { background: var(--bg2); }
+  .voice-demo { max-width: 480px; margin: 0 auto; text-align: center; }
+  .voice-orb { width: 140px; height: 140px; border-radius: 50%; background: radial-gradient(circle, rgba(0,255,136,0.15), rgba(0,255,136,0.03)); border: 2px solid rgba(0,255,136,0.2); display: flex; align-items: center; justify-content: center; margin: 0 auto 32px; cursor: pointer; position: relative; transition: all 0.3s; }
+  .voice-orb:hover { transform: scale(1.05); border-color: var(--green); box-shadow: 0 0 60px rgba(0,255,136,0.2); }
+  .voice-ring { position: absolute; border-radius: 50%; border: 1px solid rgba(0,255,136,0.15); animation: voiceRing 3s infinite; }
+  .voice-ring:nth-child(1) { inset: -12px; animation-delay: 0s; }
+  .voice-ring:nth-child(2) { inset: -24px; animation-delay: 0.5s; }
+  .voice-ring:nth-child(3) { inset: -36px; animation-delay: 1s; }
+  .voice-icon { font-size: 48px; }
+  .voice-waves { display: flex; align-items: center; justify-content: center; gap: 4px; height: 40px; margin-bottom: 24px; }
+  .wave-bar { width: 4px; background: var(--green); border-radius: 4px; animation: waveBar 1.2s ease-in-out infinite; }
+  .wave-bar:nth-child(1) { height: 12px; animation-delay: 0s; }
+  .wave-bar:nth-child(2) { height: 24px; animation-delay: 0.1s; }
+  .wave-bar:nth-child(3) { height: 36px; animation-delay: 0.2s; }
+  .wave-bar:nth-child(4) { height: 28px; animation-delay: 0.3s; }
+  .wave-bar:nth-child(5) { height: 20px; animation-delay: 0.4s; }
+  .wave-bar:nth-child(6) { height: 32px; animation-delay: 0.5s; }
+  .wave-bar:nth-child(7) { height: 16px; animation-delay: 0.6s; }
+  .wave-bar:nth-child(8) { height: 28px; animation-delay: 0.7s; }
+  .wave-bar:nth-child(9) { height: 22px; animation-delay: 0.8s; }
+  .voice-label { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .voice-sub { font-size: 13px; color: var(--text-muted); }
+
+  footer { position: relative; z-index: 1; border-top: 1px solid var(--border); padding: 40px 24px; text-align: center; background: var(--bg2); }
+  .footer-logo { font-family: var(--font-display); font-size: 20px; font-weight: 900; color: var(--text); margin-bottom: 12px; letter-spacing: 1px; }
+  .footer-logo span { color: var(--green); }
+  .footer-tagline { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+  .footer-zambia { display: inline-flex; align-items: center; gap: 8px; background: var(--green-glow); border: 1px solid rgba(0,255,136,0.2); padding: 8px 20px; border-radius: 30px; font-family: var(--font-mono); font-size: 13px; color: var(--green); margin-bottom: 24px; letter-spacing: 0.5px; }
+  .footer-copy { font-size: 12px; color: var(--text-muted); opacity: 0.5; }
+
+  .error-msg { color: #ff6b6b; font-size: 13px; font-style: italic; }
+
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.9); } }
+  @keyframes aiPulse { 0% { opacity: 0.8; transform: scale(1); } 100% { opacity: 0; transform: scale(1.6); } }
+  @keyframes typingDot { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-5px); opacity: 1; } }
+  @keyframes msgIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes voiceRing { 0% { opacity: 0.5; transform: scale(1); } 100% { opacity: 0; transform: scale(1.3); } }
+  @keyframes waveBar { 0%, 100% { transform: scaleY(0.4); opacity: 0.5; } 50% { transform: scaleY(1); opacity: 1; } }
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+  @media (max-width: 640px) {
+    nav { padding: 14px 16px; }
+    .nav-links a:not(.nav-cta) { display: none; }
+    .hero { padding: 90px 16px 50px; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .stat-card { padding: 16px 10px; }
+    .stat-value { font-size: 18px; }
+    .lang-grid { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr; }
+    .examples-grid { grid-template-columns: 1fr; }
+    .chat-header { flex-direction: column; gap: 12px; align-items: flex-start; }
+    section { padding: 60px 16px; }
+    .example-prompts { display: none; }
+    .voice-orb { width: 110px; height: 110px; }
+  }
+
+  @media (max-width: 400px) {
+    .hero h1 { font-size: 30px; }
+    .hero-btns { flex-direction: column; align-items: center; }
+    .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<div class="african-pattern"></div>
+<div class="glow-orb glow-orb-1"></div>
+<div class="glow-orb glow-orb-2"></div>
+<div class="glow-orb glow-orb-3"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="logo-icon">ZL</div>
+    <span class="logo-text">Zed<span>Lingo</span></span>
+  </a>
+  <div class="nav-links">
+    <a href="#languages">Languages</a>
+    <a href="#chat">Chat</a>
+    <a href="#chat" class="nav-cta">Try Free →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge"><span class="badge-dot"></span> Built in Zambia 🇿🇲 Now Live</div>
+  <h1>
+    <span class="line1">AI That Speaks</span>
+    <span class="line2">Zambia.</span>
+  </h1>
+  <p class="hero-sub">Chat in Bemba, Nyanja, Tonga and Lozi using the power of AI. Your language. Your intelligence.</p>
+  <div class="hero-btns">
+    <a href="#chat" class="btn-primary">⚡ Start Chatting</a>
+    <a href="#languages" class="btn-secondary">🌍 Explore Languages</a>
+  </div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-value">4</div><div class="stat-label">Languages</div></div>
+    <div class="stat-card"><div class="stat-value">FREE</div><div class="stat-label">Access</div></div>
+    <div class="stat-card"><div class="stat-value">ZM</div><div class="stat-label">Zambia Built</div></div>
+    <div class="stat-card"><div class="stat-value">AI</div><div class="stat-label">Responses</div></div>
+  </div>
+</section>
+
+<!-- LANGUAGES -->
+<section class="lang-section" id="languages">
+  <div class="max-w">
+    <div class="section-head reveal">
+      <div class="section-label">Our Languages</div>
+      <h2 class="section-title">Made for Zambia.</h2>
+      <p class="section-sub">Four official languages. One powerful AI. Your culture, your voice, your future.</p>
+    </div>
+    <div class="lang-grid reveal">
+      <div class="lang-card bemba" onclick="selectLang('Bemba')">
+        <div class="lang-dot">🟢</div>
+        <div class="lang-name">Chibemba</div>
+        <div class="lang-desc">Spoken across the Copperbelt and Northern provinces. Over 4 million speakers.</div>
+        <div class="lang-sample">"Muli shani?" — How are you?</div>
+      </div>
+      <div class="lang-card nyanja" onclick="selectLang('Nyanja')">
+        <div class="lang-dot">🔵</div>
+        <div class="lang-name">Chinyanja</div>
+        <div class="lang-desc">The language of Lusaka and Eastern Zambia. Widely spoken across Central Africa.</div>
+        <div class="lang-sample">"Muli bwanji?" — How are you?</div>
+      </div>
+      <div class="lang-card tonga" onclick="selectLang('Tonga')">
+        <div class="lang-dot">🟠</div>
+        <div class="lang-name">Tonga</div>
+        <div class="lang-desc">The voice of Southern Province. Rich in proverbs, history and tradition.</div>
+        <div class="lang-sample">"Mubotu buti?" — How are you?</div>
+      </div>
+      <div class="lang-card lozi" onclick="selectLang('Lozi')">
+        <div class="lang-dot">🟣</div>
+        <div class="lang-name">Lozi</div>
+        <div class="lang-desc">Spoken in Western Province. Language of the Litunga and the Kuomboka ceremony.</div>
+        <div class="lang-sample">"Muzuhile cwañi?" — How are you?</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="max-w">
+    <div class="section-head reveal">
+      <div class="section-label">Platform Features</div>
+      <h2 class="section-title">Built Different.</h2>
+      <p class="section-sub">Not a translation tool. A full AI intelligence platform built for Zambia.</p>
+    </div>
+    <div class="features-grid reveal">
+      <div class="feature-card"><div class="feat-icon">🎙️</div><div class="feat-title">Voice Chat</div><div class="feat-desc">Speak to the AI in your language. Voice-first design for every Zambian.</div></div>
+      <div class="feature-card"><div class="feat-icon">🌍</div><div class="feat-title">Local Languages</div><div class="feat-desc">True language understanding — not just translation. Cultural context built in.</div></div>
+      <div class="feature-card"><div class="feat-icon">⚡</div><div class="feat-title">Fast AI Responses</div><div class="feat-desc">Real-time intelligence. No waiting. Instant answers to your questions.</div></div>
+      <div class="feature-card"><div class="feat-icon">📱</div><div class="feat-title">Mobile First</div><div class="feat-desc">Designed for African phones first. Works perfectly on any device.</div></div>
+      <div class="feature-card"><div class="feat-icon">🇿🇲</div><div class="feat-title">Made for Zambia</div><div class="feat-desc">Built in Lusaka. Understands Zambian culture, context and needs.</div></div>
+      <div class="feature-card"><div class="feat-icon">🧠</div><div class="feat-title">Smart Conversations</div><div class="feat-desc">Remember context. Understand nuance. Think with you, not just for you.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CHAT -->
+<section class="chat-section" id="chat">
+  <div class="max-w">
+    <div class="section-head reveal" style="text-align:center; max-width:480px; margin:0 auto 48px;">
+      <div class="section-label" style="justify-content:center;">Live AI Chat</div>
+      <h2 class="section-title">Talk to ZedLingo AI.</h2>
+      <p class="section-sub" style="margin:0 auto;">Real AI. Real languages. Type in English or your local language.</p>
+    </div>
+    <div class="chat-window reveal">
+      <div class="chat-header">
+        <div class="chat-ai-info">
+          <div class="ai-avatar">🤖<div class="ai-pulse"></div></div>
+          <div>
+            <div class="ai-name">ZedLingo AI</div>
+            <div class="ai-status"><span class="status-dot"></span> Online · Powered by Groq</div>
+          </div>
+        </div>
+        <div class="lang-selector">
+          <button class="lang-pill bemba-pill active" onclick="switchLang(this,'Bemba')">Bemba</button>
+          <button class="lang-pill nyanja-pill" onclick="switchLang(this,'Nyanja')">Nyanja</button>
+          <button class="lang-pill tonga-pill" onclick="switchLang(this,'Tonga')">Tonga</button>
+          <button class="lang-pill lozi-pill" onclick="switchLang(this,'Lozi')">Lozi</button>
+        </div>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="msg">
+          <div class="msg-avatar ai">🤖</div>
+          <div class="ai-bubble msg-bubble">
+            <div class="msg-lang-tag" style="color:var(--green)">Chibemba · ZedLingo AI</div>
+            Muli shani! I am ZedLingo — the first AI built for Zambia. 🇿🇲 Ask me anything in Bemba, Nyanja, Tonga, Lozi, or English. I'm ready.
+          </div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <div class="example-prompts">
+          <span class="prompt-chip" onclick="sendPrompt('How do I start a business in Zambia?')">💼 Start a business</span>
+          <span class="prompt-chip" onclick="sendPrompt('Teach me farming tips')">🌾 Farming tips</span>
+          <span class="prompt-chip" onclick="sendPrompt('Give me health advice')">❤️ Health advice</span>
+          <span class="prompt-chip" onclick="sendPrompt('Help me with school work')">📚 School help</span>
+        </div>
+        <div class="input-row">
+          <textarea class="chat-input" id="chatInput" placeholder="Type your message in any language..." rows="1"
+            onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+          <button class="btn-send" id="sendBtn" onclick="sendMessage()" title="Send">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXAMPLES -->
+<section id="examples">
+  <div class="max-w">
+    <div class="section-head reveal">
+      <div class="section-label">Use Cases</div>
+      <h2 class="section-title">What Can You Ask?</h2>
+      <p class="section-sub">ZedLingo AI helps with real life. Not just chatting.</p>
+    </div>
+    <div class="examples-grid reveal">
+      <div class="example-card" onclick="jumpToChat('How do I start a business in Zambia?')"><div class="ex-icon">💼</div><div><div class="ex-title">Start a Business</div><div class="ex-sub">"How do I register a business in Zambia?"</div></div></div>
+      <div class="example-card" onclick="jumpToChat('What crops grow best in Zambia?')"><div class="ex-icon">🌾</div><div><div class="ex-title">Learn Farming</div><div class="ex-sub">"What crops grow best in my region?"</div></div></div>
+      <div class="example-card" onclick="jumpToChat('What are symptoms of malaria?')"><div class="ex-icon">❤️</div><div><div class="ex-title">Health Advice</div><div class="ex-sub">"What are symptoms of malaria?"</div></div></div>
+      <div class="example-card" onclick="jumpToChat('Help me understand mathematics')"><div class="ex-icon">📚</div><div><div class="ex-title">School Help</div><div class="ex-sub">"Explain this maths problem to me."</div></div></div>
+      <div class="example-card" onclick="jumpToChat('Teach me 10 words in Chibemba')"><div class="ex-icon">🗣️</div><div><div class="ex-title">Learn Languages</div><div class="ex-sub">"Teach me 10 words in Chibemba."</div></div></div>
+      <div class="example-card" onclick="jumpToChat('Tell me about the Kuomboka ceremony')"><div class="ex-icon">🇿🇲</div><div><div class="ex-title">Zambian Culture</div><div class="ex-sub">"Tell me about the Kuomboka ceremony."</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- VOICE -->
+<section class="voice-section" id="voice">
+  <div class="max-w">
+    <div class="section-head reveal" style="text-align:center; max-width:480px; margin:0 auto 48px;">
+      <div class="section-label" style="justify-content:center;">Coming Soon</div>
+      <h2 class="section-title">Voice AI. In Your Language.</h2>
+      <p class="section-sub" style="margin:0 auto;">Speak naturally. ZedLingo AI will respond in your language. No typing required.</p>
+    </div>
+    <div class="voice-demo reveal">
+      <div class="voice-orb"><div class="voice-ring"></div><div class="voice-ring"></div><div class="voice-ring"></div><div class="voice-icon">🎙️</div></div>
+      <div class="voice-waves">
+        <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+        <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+        <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+      </div>
+      <div class="voice-label">Voice AI — Coming Soon</div>
+      <div class="voice-sub">Launching in all 4 Zambian languages</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Zed<span>Lingo</span> AI</div>
+  <div class="footer-tagline">// AI That Speaks Zambia</div>
+  <div class="footer-zambia">🇿🇲 Built in Zambia · Powered by African Intelligence</div>
+  <div class="footer-copy">© 2025 ZedLingo AI · Zambia · All rights reserved</div>
+</footer>
+
+<script>
+// ── PARTICLES ──
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let W, H;
+
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+function initParticles() {
+  particles = [];
+  const count = Math.floor(W * H / 18000);
+  for (let i = 0; i < count; i++) {
+    particles.push({ x: Math.random()*W, y: Math.random()*H, r: Math.random()*1.5+0.3, vx: (Math.random()-0.5)*0.25, vy: (Math.random()-0.5)*0.25, alpha: Math.random()*0.5+0.1, color: ['#00ff88','#4d9fff','#b46fff'][Math.floor(Math.random()*3)] });
+  }
+}
+function drawParticles() {
+  ctx.clearRect(0,0,W,H);
+  for (let p of particles) {
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle = p.color; ctx.globalAlpha = p.alpha; ctx.fill();
+    p.x += p.vx; p.y += p.vy;
+    if (p.x<0||p.x>W) p.vx*=-1;
+    if (p.y<0||p.y>H) p.vy*=-1;
+  }
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(drawParticles);
+}
+resize(); initParticles(); drawParticles();
+window.addEventListener('resize', () => { resize(); initParticles(); });
+
+// ── SCROLL REVEAL ──
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── CHAT STATE ──
+let currentLang = 'Bemba';
+let isLoading = false;
+
+function switchLang(btn, lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function selectLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-pill').forEach(p => {
+    p.classList.remove('active');
+    if (p.textContent.trim() === lang) p.classList.add('active');
+  });
+  document.getElementById('chat').scrollIntoView({ behavior: 'smooth' });
+}
+
+function getLangColor(lang) {
+  const colors = { Bemba: 'var(--green)', Nyanja: 'var(--blue)', Tonga: 'var(--orange)', Lozi: 'var(--purple)' };
+  return colors[lang] || 'var(--green)';
+}
+
+function addMessage(text, isUser, lang) {
+  const container = document.getElementById('chatMessages');
+  const msg = document.createElement('div');
+  msg.className = `msg ${isUser ? 'user-msg' : ''}`;
+  msg.innerHTML = `
+    <div class="msg-avatar ${isUser ? 'user' : 'ai'}">${isUser ? '👤' : '🤖'}</div>
+    <div class="${isUser ? 'user-bubble' : 'ai-bubble'} msg-bubble">
+      <div class="msg-lang-tag" style="color:${getLangColor(lang)}">${lang} · ${isUser ? 'You' : 'ZedLingo AI'}</div>
+      ${text}
+    </div>`;
+  container.appendChild(msg);
+  container.scrollTop = container.scrollHeight;
+}
+
+function showTyping() {
+  const container = document.getElementById('chatMessages');
+  const el = document.createElement('div');
+  el.id = 'typingIndicator';
+  el.className = 'msg typing-indicator';
+  el.innerHTML = `<div class="msg-avatar ai">🤖</div><div class="typing-dots"><span></span><span></span><span></span></div>`;
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typingIndicator');
+  if (t) t.remove();
+}
+
+async function sendMessage() {
+  if (isLoading) return;
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  addMessage(text, true, currentLang);
+  input.value = '';
+  input.style.height = 'auto';
+
+  isLoading = true;
+  document.getElementById('sendBtn').disabled = true;
+  showTyping();
+
+  try {
+    const response = await fetch('/.netlify/functions/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, language: currentLang })
+    });
+
+    const data = await response.json();
+    removeTyping();
+
+    if (data.reply) {
+      addMessage(data.reply, false, currentLang);
+    } else {
+      addMessage('<span class="error-msg">Something went wrong. Please try again.</span>', false, currentLang);
+    }
+  } catch (err) {
+    removeTyping();
+    addMessage('<span class="error-msg">Connection error. Check your internet and try again.</span>', false, currentLang);
+  } finally {
+    isLoading = false;
+    document.getElementById('sendBtn').disabled = false;
+  }
+}
+
+function sendPrompt(text) {
+  document.getElementById('chatInput').value = text;
+  sendMessage();
+}
+
+function jumpToChat(text) {
+  document.getElementById('chatInput').value = text;
+  document.getElementById('chat').scrollIntoView({ behavior: 'smooth' });
+  setTimeout(() => sendMessage(), 700);
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+</script>
+</body>
+</html>
