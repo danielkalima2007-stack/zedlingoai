@@ -26,7 +26,7 @@ Never say you can't speak these languages — always try your best.`;
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.YOUR_GROQ_API_KEY}`
+        "Authorization": `Bearer ${process.env._GROQ_API_KEY}`
       },
       body: JSON.stringify({
         model: "llama3-8b-8192",
